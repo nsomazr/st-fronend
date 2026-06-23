@@ -40,6 +40,34 @@ export function TravelerCounter({ value, onChange, error }) {
   );
 }
 
+export function OptionPicker({ options, value, onChange, error, columns = 2 }) {
+  return (
+    <div
+      className={`grid gap-2 ${
+        columns === 3 ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-2'
+      } ${error ? 'rounded-xl ring-1 ring-red-400 p-0.5' : ''}`}
+    >
+      {options.map((opt) => {
+        const selected = value === opt.value;
+        return (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => onChange(opt.value)}
+            className={`min-h-[44px] px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 ${
+              selected
+                ? 'bg-brand-gold text-brand-navy shadow-sm'
+                : 'bg-white border border-gray-200 text-brand-navy hover:border-brand-purple'
+            }`}
+          >
+            {opt.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export function BudgetPicker({ value, onChange, error }) {
   return (
     <div

@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Loader2, Mail, Phone, User } from 'lucide-react';
 import Stepper from '../ui/Stepper';
@@ -9,19 +8,23 @@ import Button from '../ui/Button';
 import Card from '../ui/Card';
 import ConfirmCard from './ConfirmCard';
 import CountryPicker from './CountryPicker';
-import DestinationPicker from './DestinationPicker';
 import ServicePicker from './ServicePicker';
-import { TravelerCounter, BudgetPicker } from './TripPickers';
+import ServiceFormFields from './ServiceFormFields';
 import { useServices } from '../../hooks/useServices';
 import { useBooking } from '../../hooks/useBooking';
-import { bookingDetailsSchema } from '../../utils/validators';
+import { getServiceBookingSchema, serviceSelectSchema } from '../../utils/validators';
 import { BUDGET_RANGES } from '../../utils/formatters';
 import { DEFAULT_COUNTRY, STEP_MESSAGES } from '../../utils/bookingData';
-import { formatDate } from '../../utils/formatters';
+import {
+  getServiceFormConfig,
+  buildSpecialRequests,
+  getSummaryRows,
+} from '../../utils/serviceForms';
+import { formatDate, toApiDate } from '../../utils/formatters';
 import { ServiceCardSkeleton } from '../ui/Skeleton';
 import { controlClass, fieldLabelClass, gridClass, sectionClass } from './formStyles';
 
-const STEPS = ['Details', 'Confirm'];
+const STEPS = ['Service', 'Details', 'Confirm'];
 
 const slideVariants = {
   enter: (dir) => ({ x: dir > 0 ? 24 : -24, opacity: 0 }),
@@ -50,6 +53,16 @@ function Section({ title, children }) {
   );
 }
 
+function applyYupErrors(form, err) {
+  if (err.inner) {
+    err.inner.forEach((e) => form.setError(e.path, { type: 'manual', message: e.message }));
+    return;
+  }
+  if (err.path) {
+    form.setError(err.path, { type: 'manual', message: err.message });
+  }
+}
+
 export default function BookingForm() {
   const [searchParams] = useSearchParams();
   const [step, setStep] = useState(0);
@@ -58,11 +71,9 @@ export default function BookingForm() {
   const { createBooking, booking, loading, error } = useBooking();
 
   const form = useForm({
-    resolver: yupResolver(bookingDetailsSchema),
     defaultValues: {
       country: DEFAULT_COUNTRY,
       num_travelers: 1,
-      special_requests: '',
     },
   });
 
@@ -79,24 +90,67 @@ export default function BookingForm() {
     }
   }, [searchParams, services, form]);
 
-  if (booking) return <ConfirmCard booking={booking} />;
-
   const values = form.watch();
   const selectedService = services.find((s) => s.id === Number(values.service_id));
-  const budgetLabel = BUDGET_RANGES.find((b) => b.value === values.budget_range)?.label;
-  const stepMsg = STEP_MESSAGES[step];
+  const serviceSlug = selectedService?.slug || 'travel-consultancy';
+  const serviceConfig = useMemo(() => getServiceFormConfig(serviceSlug), [serviceSlug]);
   const { errors } = form.formState;
 
-  const onDetailsSubmit = () => goToStep(1);
+  const stepMsg =
+    step === 1
+      ? { title: serviceConfig.stepTitle, subtitle: serviceConfig.stepSubtitle }
+      : STEP_MESSAGES[step];
 
-  const onFinalSubmit = async (data) => {
-    const payload = {
-      ...data,
-      special_requests: data.special_requests || '',
-      service_id: Number(data.service_id),
-      num_travelers: Number(data.num_travelers),
-    };
-    await createBooking(payload);
+  const budgetLabel = BUDGET_RANGES.find((b) => b.value === values.budget_range)?.label;
+  const summaryRows = useMemo(() => getSummaryRows(serviceSlug, values), [serviceSlug, values]);
+
+  if (booking) return <ConfirmCard booking={booking} />;
+
+  const onServiceNext = async () => {
+    form.clearErrors();
+    try {
+      await serviceSelectSchema.validate(
+        { service_id: values.service_id },
+        { abortEarly: false },
+      );
+      goToStep(1);
+    } catch (err) {
+      applyYupErrors(form, err);
+    }
+  };
+
+  const onDetailsSubmit = async () => {
+    form.clearErrors();
+    try {
+      await getServiceBookingSchema(serviceSlug).validate(values, { abortEarly: false });
+      goToStep(2);
+    } catch (err) {
+      applyYupErrors(form, err);
+    }
+  };
+
+  const onFinalSubmit = async () => {
+    form.clearErrors();
+    try {
+      const data = await getServiceBookingSchema(serviceSlug).validate(values, { abortEarly: false });
+      const merged = { ...values, ...data };
+      const payload = {
+        full_name: data.full_name,
+        email: data.email,
+        phone: data.phone,
+        country: data.country,
+        service_id: Number(data.service_id),
+        destination: data.destination,
+        travel_date: toApiDate(data.travel_date),
+        return_date: toApiDate(data.return_date),
+        num_travelers: Number(data.num_travelers),
+        budget_range: data.budget_range,
+        special_requests: buildSpecialRequests(serviceSlug, merged),
+      };
+      await createBooking(payload);
+    } catch (err) {
+      if (err.name === 'ValidationError') applyYupErrors(form, err);
+    }
   };
 
   return (
@@ -129,8 +183,37 @@ export default function BookingForm() {
               transition={{ duration: 0.25, ease: 'easeInOut' }}
             >
               {step === 0 && (
-                <form onSubmit={form.handleSubmit(onDetailsSubmit)} className="space-y-6">
-                  <Section title="Your details">
+                <div className="space-y-6">
+                  <Field label="What do you need help with?" error={errors.service_id?.message} required>
+                    {servicesLoading ? (
+                      <ServiceCardSkeleton withImage />
+                    ) : (
+                      <Controller
+                        name="service_id"
+                        control={form.control}
+                        render={({ field }) => (
+                          <ServicePicker
+                            services={services}
+                            value={field.value}
+                            onChange={field.onChange}
+                            error={errors.service_id?.message}
+                          />
+                        )}
+                      />
+                    )}
+                  </Field>
+
+                  <div className="flex justify-end pt-2">
+                    <Button type="button" onClick={onServiceNext}>
+                      Continue <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {step === 1 && (
+                <form onSubmit={(e) => { e.preventDefault(); onDetailsSubmit(); }} className="space-y-6">
+                  <Section title="Your contact details">
                     <div className={gridClass}>
                       <Field label="Full Name" error={errors.full_name?.message} required>
                         <div className="relative">
@@ -182,88 +265,14 @@ export default function BookingForm() {
                     </div>
                   </Section>
 
-                  <Section title="Trip details">
-                    <Field label="Service" error={errors.service_id?.message} required>
-                      {servicesLoading ? (
-                        <ServiceCardSkeleton withImage />
-                      ) : (
-                        <Controller
-                          name="service_id"
-                          control={form.control}
-                          render={({ field }) => (
-                            <ServicePicker
-                              services={services}
-                              value={field.value}
-                              onChange={field.onChange}
-                              error={errors.service_id?.message}
-                            />
-                          )}
-                        />
-                      )}
-                    </Field>
-
-                    <Field label="Destination" error={errors.destination?.message} required>
-                      <Controller
-                        name="destination"
-                        control={form.control}
-                        render={({ field }) => (
-                          <DestinationPicker
-                            value={field.value}
-                            onChange={field.onChange}
-                            error={errors.destination?.message}
-                          />
-                        )}
-                      />
-                    </Field>
-
-                    <div className={gridClass}>
-                      <Field label="Departure" error={errors.travel_date?.message} required>
-                        <input
-                          {...form.register('travel_date')}
-                          type="date"
-                          min={new Date().toISOString().split('T')[0]}
-                          className={controlClass(errors.travel_date)}
-                        />
-                      </Field>
-                      <Field label="Return" error={errors.return_date?.message}>
-                        <input
-                          {...form.register('return_date')}
-                          type="date"
-                          className={controlClass(errors.return_date)}
-                        />
-                      </Field>
-                    </div>
-
-                    <Field label="Travelers" error={errors.num_travelers?.message} required>
-                      <Controller
-                        name="num_travelers"
-                        control={form.control}
-                        render={({ field }) => (
-                          <TravelerCounter
-                            value={field.value}
-                            onChange={field.onChange}
-                            error={errors.num_travelers?.message}
-                          />
-                        )}
-                      />
-                    </Field>
-
-                    <Field label="Budget" error={errors.budget_range?.message} required>
-                      <Controller
-                        name="budget_range"
-                        control={form.control}
-                        render={({ field }) => (
-                          <BudgetPicker
-                            value={field.value}
-                            onChange={field.onChange}
-                            error={errors.budget_range?.message}
-                          />
-                        )}
-                      />
-                    </Field>
+                  <Section title={serviceConfig.summaryTitle}>
+                    <ServiceFormFields fields={serviceConfig.fields} form={form} values={values} />
                   </Section>
 
-                  <div className="flex justify-end pt-2">
+                  <div className="flex justify-between pt-2">
+                    <Button type="button" variant="outline" onClick={() => goToStep(0)}>
+                      <ArrowLeft className="w-4 h-4" /> Back
+                    </Button>
                     <Button type="submit">
                       Review <ArrowRight className="w-4 h-4" />
                     </Button>
@@ -271,62 +280,56 @@ export default function BookingForm() {
                 </form>
               )}
 
-              {step === 1 && (
-                <form onSubmit={form.handleSubmit(onFinalSubmit)} className="space-y-5">
+              {step === 2 && (
+                <form onSubmit={(e) => { e.preventDefault(); onFinalSubmit(); }} className="space-y-5">
                   <div className="rounded-xl border border-brand-gold/30 overflow-hidden text-sm">
                     <div className="bg-brand-navy px-4 py-2.5">
-                      <p className="text-white text-sm font-semibold">Trip summary</p>
+                      <p className="text-white text-sm font-semibold">{serviceConfig.summaryTitle}</p>
                     </div>
                     <div className="bg-brand-light px-4 py-4 space-y-4">
                       <div className="pb-3 border-b border-brand-gold/20">
                         <p className="font-semibold text-brand-navy">{values.full_name}</p>
-                        <p className="text-gray-500 text-xs mt-0.5">{values.email} · {values.phone}</p>
+                        <p className="text-gray-500 text-xs mt-0.5">
+                          {values.email} · {values.phone}
+                        </p>
+                        <p className="text-gray-500 text-xs mt-0.5">From {values.country}</p>
                       </div>
+
+                      <div className="pb-3 border-b border-brand-gold/20">
+                        <p className="text-gray-500 text-xs mb-0.5">Service</p>
+                        <p className="font-medium text-brand-navy">{selectedService?.name}</p>
+                      </div>
+
                       <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-                        <div>
-                          <p className="text-gray-500 text-xs mb-0.5">From</p>
-                          <p className="font-medium text-brand-navy">{values.country}</p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500 text-xs mb-0.5">To</p>
-                          <p className="font-medium text-brand-navy">{values.destination}</p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500 text-xs mb-0.5">Service</p>
-                          <p className="font-medium text-brand-navy">{selectedService?.name}</p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500 text-xs mb-0.5">Travelers</p>
-                          <p className="font-medium text-brand-navy">{values.num_travelers}</p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500 text-xs mb-0.5">Departure</p>
-                          <p className="font-medium text-brand-navy">{formatDate(values.travel_date)}</p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500 text-xs mb-0.5">Budget</p>
-                          <p className="font-medium text-brand-navy">{budgetLabel}</p>
-                        </div>
+                        {summaryRows.map((row) => (
+                          <div key={row.label}>
+                            <p className="text-gray-500 text-xs mb-0.5">{row.label}</p>
+                            <p className="font-medium text-brand-navy">
+                              {row.label.toLowerCase().includes('date')
+                                ? formatDate(row.value)
+                                : row.value}
+                            </p>
+                          </div>
+                        ))}
+                        {budgetLabel && (
+                          <div>
+                            <p className="text-gray-500 text-xs mb-0.5">Budget</p>
+                            <p className="font-medium text-brand-navy">{budgetLabel}</p>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
 
-                  <Field label="Special requests">
-                    <textarea
-                      {...form.register('special_requests')}
-                      rows={3}
-                      className={`${controlClass(false)} h-auto py-2.5 resize-none`}
-                      placeholder="Dietary needs, celebrations, etc."
-                    />
-                  </Field>
-
                   <div className="flex justify-between pt-1">
-                    <Button type="button" variant="outline" onClick={() => goToStep(0)}>
+                    <Button type="button" variant="outline" onClick={() => goToStep(1)}>
                       <ArrowLeft className="w-4 h-4" /> Back
                     </Button>
                     <Button type="submit" disabled={loading}>
                       {loading ? (
-                        <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</>
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" /> Sending...
+                        </>
                       ) : (
                         <>Confirm Booking</>
                       )}

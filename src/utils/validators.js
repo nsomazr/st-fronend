@@ -1,4 +1,5 @@
 import * as yup from 'yup';
+import { getServiceFormConfig } from './serviceForms';
 
 export const personalInfoSchema = yup.object({
   full_name: yup.string().required('Full name is required').min(2, 'Name must be at least 2 characters'),
@@ -10,11 +11,11 @@ export const personalInfoSchema = yup.object({
 export const tripDetailsSchema = yup.object({
   service_id: yup.number().required('Please select a service').positive('Please select a service'),
   destination: yup.string().required('Destination is required'),
-  travel_date: yup.date().required('Travel date is required').typeError('Invalid date'),
+  travel_date: yup.string().required('Travel date is required'),
   return_date: yup
-    .date()
+    .string()
     .nullable()
-    .typeError('Invalid date')
+    .transform((v) => (v === '' || v == null ? null : v))
     .test('after-travel', 'Return date must be after travel date', function (value) {
       if (!value) return true;
       return value > this.parent.travel_date;
@@ -24,6 +25,15 @@ export const tripDetailsSchema = yup.object({
 });
 
 export const bookingDetailsSchema = personalInfoSchema.concat(tripDetailsSchema);
+
+export const serviceSelectSchema = yup.object({
+  service_id: yup.number().required('Please select a service').positive('Please select a service'),
+});
+
+export function getServiceBookingSchema(slug) {
+  const config = getServiceFormConfig(slug);
+  return personalInfoSchema.concat(config.schema).concat(serviceSelectSchema);
+}
 
 export const contactSchema = yup.object({
   name: yup.string().required('Name is required'),

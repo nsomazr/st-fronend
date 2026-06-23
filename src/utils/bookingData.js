@@ -16,6 +16,7 @@ export const POPULAR_DESTINATIONS = [
 ];
 
 export const STEP_MESSAGES = [
-  { title: 'Book your trip', subtitle: 'A few quick details and we\'ll handle the rest' },
-  { title: 'Review & confirm', subtitle: 'Check everything looks right' },
+  { title: 'Choose your service', subtitle: 'Select the service that best fits your travel needs' },
+  { title: 'Your details', subtitle: 'Tell us about you and your trip' },
+  { title: 'Review & confirm', subtitle: 'Check everything looks right before submitting' },
 ];
