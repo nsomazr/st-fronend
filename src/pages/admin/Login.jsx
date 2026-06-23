@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Link, useNavigate } from 'react-router-dom';
@@ -8,21 +9,27 @@ import Card from '../../components/ui/Card';
 import { useAuth } from '../../context/AuthContext';
 import { loginSchema } from '../../utils/validators';
 import { BRAND_NAME } from '../../utils/constants';
+import { getLoginErrorMessage } from '../../utils/authErrors';
+import { API_URL } from '../../services/api';
 
 export default function AdminLogin() {
   const { login, loading } = useAuth();
   const navigate = useNavigate();
+  const [apiError, setApiError] = useState('');
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: yupResolver(loginSchema),
   });
 
   const onSubmit = async (data) => {
+    setApiError('');
     try {
       await login(data.username, data.password);
       toast.success('Welcome back!');
       navigate('/admin/dashboard');
-    } catch {
-      toast.error('Invalid credentials. Please try again.');
+    } catch (err) {
+      const message = getLoginErrorMessage(err);
+      setApiError(message);
+      toast.error(message);
     }
   };
 
@@ -44,6 +51,11 @@ export default function AdminLogin() {
           <p className="text-gray-500 text-sm mt-1">{BRAND_NAME}</p>
         </div>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {apiError && (
+            <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+              {apiError}
+            </div>
+          )}
           <div>
             <label className="block text-sm font-medium text-brand-navy mb-1">Username</label>
             <input
@@ -66,6 +78,9 @@ export default function AdminLogin() {
           <Button type="submit" disabled={loading} className="w-full">
             {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Signing in...</> : 'Sign In'}
           </Button>
+          {import.meta.env.DEV && (
+            <p className="text-center text-xs text-gray-400">API: {API_URL}</p>
+          )}
         </form>
       </Card>
       </div>

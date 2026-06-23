@@ -13,10 +13,16 @@ export function AuthProvider({ children }) {
     setLoading(true);
     try {
       const { data } = await adminApi.login(username, password);
+      if (!data?.access) {
+        throw new Error('Login response missing access token');
+      }
       localStorage.setItem('access_token', data.access);
       localStorage.setItem('refresh_token', data.refresh);
       setIsAuthenticated(true);
       return data;
+    } catch (err) {
+      setIsAuthenticated(false);
+      throw err;
     } finally {
       setLoading(false);
     }

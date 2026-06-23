@@ -30,8 +30,9 @@ echo "Installing dependencies..."
 npm install
 
 echo "Building production bundle..."
-echo "   VITE_API_URL=${VITE_API_URL:-https://api.st.nileagi.com/api}"
-VITE_API_URL="${VITE_API_URL:-https://api.st.nileagi.com/api}" npm run build
+BUILD_API_URL="${VITE_API_URL_PRODUCTION:-https://api.st.nileagi.com/api}"
+echo "   VITE_API_URL=${BUILD_API_URL}"
+VITE_API_URL="$BUILD_API_URL" npm run build
 
 if [[ ! -d dist ]]; then
   echo "Error: dist/ folder not found after build."
@@ -53,6 +54,6 @@ pm2 save
 echo ""
 echo "✅ Frontend deployed with PM2"
 echo "   App name : $PM2_APP_NAME"
-echo "   Port     : ${PORT:-5173}"
+echo "   Port     : ${PORT:-3094}"
 echo "   Logs     : pm2 logs $PM2_APP_NAME"
 echo "   Status   : pm2 status $PM2_APP_NAME"

@@ -1,6 +1,6 @@
 const path = require('path');
 
-const port = process.env.PORT || 5173;
+const port = process.env.PORT || 3094;
 
 module.exports = {
   apps: [

@@ -5,7 +5,7 @@ React + Vite frontend for the Smart Travels travel booking system.
 ## Prerequisites
 
 - Node.js 18+
-- Backend API running at `http://localhost:8000`
+- Backend API running at `http://localhost:8094`
 
 ## Quick Start
 
@@ -22,13 +22,13 @@ npm install
 npm run dev
 ```
 
-App available at `http://localhost:5173`
+App available at `http://localhost:3094`
 
 ## Environment Variables
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `VITE_API_URL` | Backend API base URL | `http://localhost:8000/api` |
+| `VITE_API_URL` | Backend API base URL | `http://localhost:8094/api` |
 
 For production, set `VITE_API_URL=https://api.st.nileagi.com/api` in `.env` before deploying.
 
@@ -61,7 +61,7 @@ pm2 stop st-frontend
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `VITE_API_URL` | — | Production API URL (used at build time) |
-| `PORT` | `5173` | Static server port |
+| `PORT` | `3094` | Static server port |
 | `PM2_APP_NAME` | `st-frontend` | PM2 process name |
 
 ## Build
