@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
-import { Mail, MapPin, Phone } from 'lucide-react';
+import { Mail, MapPin, MessageCircle, Phone } from 'lucide-react';
 import { BRAND_NAME, CONTACT, TAGLINE } from '../../utils/constants';
+import { WhatsAppLink } from '../ui/WhatsAppChat';
 
 export default function Footer() {
   return (
@@ -43,10 +44,14 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold text-brand-gold mb-4">Contact Us</h4>
             <div className="space-y-3">
-              <a href={`tel:${CONTACT.phone}`} className="flex items-center gap-2 text-white/70 hover:text-white text-sm transition-all duration-300">
+              <a href={`tel:${CONTACT.phoneTel}`} className="flex items-center gap-2 text-white/70 hover:text-white text-sm transition-all duration-300">
                 <Phone className="w-4 h-4 text-brand-gold" />
-                {CONTACT.phone}
+                {CONTACT.phoneDisplay}
               </a>
+              <WhatsAppLink className="flex items-center gap-2 text-white/70 hover:text-[#25D366] text-sm transition-all duration-300">
+                <MessageCircle className="w-4 h-4 text-brand-gold" />
+                Let&apos;s chat on WhatsApp
+              </WhatsAppLink>
               <a href={`mailto:${CONTACT.email}`} className="flex items-center gap-2 text-white/70 hover:text-white text-sm transition-all duration-300">
                 <Mail className="w-4 h-4 text-brand-gold" />
                 {CONTACT.email}

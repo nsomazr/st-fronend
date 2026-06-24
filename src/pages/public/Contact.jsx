@@ -1,10 +1,11 @@
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { motion } from 'framer-motion';
-import { Mail, MapPin, Phone, Loader2 } from 'lucide-react';
+import { Mail, MapPin, MessageCircle, Phone, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
+import { WhatsAppLink } from '../../components/ui/WhatsAppChat';
 import { contactSchema } from '../../utils/validators';
 import { CONTACT } from '../../utils/constants';
 import { contactApi } from '../../services/api';
@@ -81,9 +82,10 @@ export default function Contact() {
 
           <div className="space-y-6">
             {[
-              { icon: Phone, label: 'Phone', value: CONTACT.phone, href: `tel:${CONTACT.phone}` },
+              { icon: Phone, label: 'Phone', value: CONTACT.phoneDisplay, href: `tel:${CONTACT.phoneTel}` },
+              { icon: MessageCircle, label: 'WhatsApp', value: "Let's chat on WhatsApp", href: CONTACT.whatsappUrl, external: true },
               { icon: Mail, label: 'Email', value: CONTACT.email, href: `mailto:${CONTACT.email}` },
-              { icon: MapPin, label: 'Location', value: CONTACT.address },
+              { icon: MapPin, label: 'Office Location', value: CONTACT.address },
             ].map((item) => (
               <Card key={item.label} className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-brand-gold/10 rounded-xl flex items-center justify-center text-brand-gold">
@@ -92,7 +94,12 @@ export default function Contact() {
                 <div>
                   <p className="text-sm text-gray-500">{item.label}</p>
                   {item.href ? (
-                    <a href={item.href} className="font-semibold text-brand-navy hover:text-brand-purple transition-all duration-300">
+                    <a
+                      href={item.href}
+                      target={item.external ? '_blank' : undefined}
+                      rel={item.external ? 'noopener noreferrer' : undefined}
+                      className="font-semibold text-brand-navy hover:text-brand-purple transition-all duration-300"
+                    >
                       {item.value}
                     </a>
                   ) : (
@@ -102,10 +109,23 @@ export default function Contact() {
               </Card>
             ))}
 
+            <Card className="bg-[#25D366]/10 border border-[#25D366]/30">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <p className="font-bold text-brand-navy">Prefer WhatsApp?</p>
+                  <p className="text-sm text-gray-600 mt-1">Chat with Smart Travels by HL on {CONTACT.phoneDisplay}</p>
+                </div>
+                <WhatsAppLink className="inline-flex items-center justify-center gap-2 bg-[#25D366] text-white font-semibold px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity shrink-0">
+                  <MessageCircle className="w-5 h-5" />
+                  Let&apos;s chat on WhatsApp
+                </WhatsAppLink>
+              </div>
+            </Card>
+
             <Card className="p-0 overflow-hidden">
               <iframe
                 title="Office Location"
-                src="https://maps.google.com/maps?q=Posta+House,+7+Ghana+Avenue,+Dar+es+Salaam,+Tanzania&output=embed"
+                src="https://maps.google.com/maps?q=Sukaei+House,+Posta,+Dar+es+Salaam,+Tanzania&output=embed"
                 className="w-full h-64 border-0"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"

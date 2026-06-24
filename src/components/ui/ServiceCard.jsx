@@ -1,13 +1,12 @@
 import { Link } from 'react-router-dom';
-import { ChevronRight, Compass, Plane, FileText, Palmtree } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import Card from './Card';
 import { SERVICE_IMAGES } from '../../utils/constants';
+import { getServiceIcon } from '../../utils/serviceIcons';
 import PriceDisplay from './PriceDisplay';
 
-const iconMap = { compass: Compass, plane: Plane, 'file-text': FileText, palmtree: Palmtree };
-
 export default function ServiceCard({ service, variant = 'grid' }) {
-  const Icon = iconMap[service.icon] || Compass;
+  const Icon = getServiceIcon(service.icon);
   const image = service.image || SERVICE_IMAGES[service.slug];
 
   if (variant === 'list') {

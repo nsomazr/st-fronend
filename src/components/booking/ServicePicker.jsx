@@ -1,19 +1,17 @@
-import { Compass, FileText, Palmtree, Plane } from 'lucide-react';
+import { getServiceIcon } from '../../utils/serviceIcons';
 import { SERVICE_IMAGES } from '../../utils/constants';
 import PriceDisplay from '../ui/PriceDisplay';
-
-const iconMap = { compass: Compass, plane: Plane, 'file-text': FileText, palmtree: Palmtree };
 
 export default function ServicePicker({ services, value, onChange, error }) {
   return (
     <div
-      className={`grid grid-cols-1 sm:grid-cols-2 gap-3 ${
+      className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 ${
         error ? 'rounded-xl ring-1 ring-red-400 p-0.5' : ''
       }`}
     >
       {services.map((service) => {
         const selected = Number(value) === service.id;
-        const Icon = iconMap[service.icon] || Compass;
+        const Icon = getServiceIcon(service.icon);
         const image = service.image || SERVICE_IMAGES[service.slug];
 
         return (

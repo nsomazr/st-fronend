@@ -1,7 +1,11 @@
 export const CONTACT = {
-  phone: '+255 713689686',
+  phone: '0794333544',
+  phoneDisplay: '0794 333 544',
+  phoneTel: '+255794333544',
+  whatsapp: '0794333544',
+  whatsappUrl: 'https://wa.me/255794333544?text=Hello%20Smart%20Travels%20by%20HL',
   email: 'info@akisgroup.net',
-  address: 'Posta House, 7 Ghana Avenue / Ohio Street, Dar es Salaam, Tanzania',
+  address: 'Sukaei House, Posta, Dar es Salaam, Tanzania',
   city: 'Dar es Salaam, Tanzania',
 };
 
@@ -46,6 +50,12 @@ export const SERVICE_IMAGES = {
   'air-ticketing': 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&q=80',
   'visa-documentation-assistance': 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80',
   'holiday-planning': 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80',
+  'hotel-reservations': 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80',
+  'corporate-travels': 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80',
+  'airport-pickups-drop-off': 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&q=80',
+  'safari-and-tours': 'https://images.unsplash.com/photo-1516426122078-c23e76319801?w=800&q=80',
+  'maasai-experience-tour': 'https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=800&q=80',
+  'travel-insurance': 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80',
 };
 
 export const FALLBACK_SERVICES = [
@@ -93,6 +103,72 @@ export const FALLBACK_SERVICES = [
     price_from: 200,
     is_active: true,
   },
+  {
+    id: 5,
+    name: 'Hotel Reservations',
+    slug: 'hotel-reservations',
+    description:
+      'Handpicked hotels and resorts at competitive rates. From city stays to beach retreats, we find the right room for your trip.',
+    icon: 'hotel',
+    image: SERVICE_IMAGES['hotel-reservations'],
+    price_from: 80,
+    is_active: true,
+  },
+  {
+    id: 6,
+    name: 'Corporate Travels',
+    slug: 'corporate-travels',
+    description:
+      'Business travel management for companies — flights, hotels, transfers, and itineraries tailored to your corporate needs.',
+    icon: 'briefcase',
+    image: SERVICE_IMAGES['corporate-travels'],
+    price_from: 150,
+    is_active: true,
+  },
+  {
+    id: 7,
+    name: 'Airport Pickups & Drop Off',
+    slug: 'airport-pickups-drop-off',
+    description:
+      'Reliable airport transfers with professional drivers. Meet-and-greet pickups and comfortable drop-offs, on time every time.',
+    icon: 'car',
+    image: SERVICE_IMAGES['airport-pickups-drop-off'],
+    price_from: 40,
+    is_active: true,
+  },
+  {
+    id: 8,
+    name: 'Safari & Tours',
+    slug: 'safari-and-tours',
+    description:
+      'Unforgettable wildlife safaris and guided tours across Tanzania and East Africa — Serengeti, Ngorongoro, and beyond.',
+    icon: 'binoculars',
+    image: SERVICE_IMAGES['safari-and-tours'],
+    price_from: 250,
+    is_active: true,
+  },
+  {
+    id: 9,
+    name: 'Maasai Experience Tour',
+    slug: 'maasai-experience-tour',
+    description:
+      'Authentic Maasai cultural experiences — village visits, traditional ceremonies, and immersive day tours with local guides.',
+    icon: 'users',
+    image: SERVICE_IMAGES['maasai-experience-tour'],
+    price_from: 120,
+    is_active: true,
+  },
+  {
+    id: 10,
+    name: 'Travel Insurance',
+    slug: 'travel-insurance',
+    description:
+      'Comprehensive travel insurance cover for medical emergencies, trip cancellation, lost baggage, and peace of mind abroad.',
+    icon: 'shield',
+    image: SERVICE_IMAGES['travel-insurance'],
+    price_from: 30,
+    is_active: true,
+  },
 ];
 
 export const SERVICE_DETAILS = {
@@ -135,6 +211,66 @@ export const SERVICE_DETAILS = {
       'Honeymoon, family, and adventure packages',
     ],
     idealFor: 'Couples, families, and groups seeking a fully planned getaway',
+  },
+  'hotel-reservations': {
+    highlights: [
+      'Hotels, resorts, and boutique stays',
+      'Best available rates and room upgrades',
+      'Flexible check-in and cancellation options',
+      'Group and long-stay bookings',
+      'Recommendations by destination and budget',
+    ],
+    idealFor: 'Leisure travelers, business guests, and families',
+  },
+  'corporate-travels': {
+    highlights: [
+      'Corporate flight and hotel bookings',
+      'Travel policy-friendly itineraries',
+      'Group and conference travel',
+      'Executive transfers and VIP handling',
+      'Dedicated account support',
+    ],
+    idealFor: 'Companies, NGOs, and business teams',
+  },
+  'airport-pickups-drop-off': {
+    highlights: [
+      'Airport meet-and-greet service',
+      'Sedan, SUV, and van options',
+      'Flight tracking for timely pickups',
+      'City-to-airport drop-offs',
+      'Hotel and residence transfers',
+    ],
+    idealFor: 'Arriving visitors, departing guests, and business travelers',
+  },
+  'safari-and-tours': {
+    highlights: [
+      'Serengeti, Ngorongoro, and Tarangire safaris',
+      'Private and group game drives',
+      'Professional safari guides',
+      'Luxury lodges and tented camps',
+      'Custom multi-day tour packages',
+    ],
+    idealFor: 'Wildlife lovers, families, and adventure seekers',
+  },
+  'maasai-experience-tour': {
+    highlights: [
+      'Authentic Maasai village visits',
+      'Traditional dance and cultural ceremonies',
+      'Guided walks with Maasai warriors',
+      'Handicraft and local market experiences',
+      'Half-day and full-day tour options',
+    ],
+    idealFor: 'Culture enthusiasts and curious travelers',
+  },
+  'travel-insurance': {
+    highlights: [
+      'Medical and emergency evacuation cover',
+      'Trip cancellation and interruption',
+      'Lost baggage and travel delay protection',
+      'Schengen and visa-compliant policies',
+      'Single-trip and annual plans',
+    ],
+    idealFor: 'All travelers seeking security and peace of mind',
   },
 };
 

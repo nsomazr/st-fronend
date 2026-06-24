@@ -3,10 +3,11 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Compass, BadgeDollarSign, Heart, Headphones,
-  Phone, Mail, MapPin,
+  Phone, Mail, MapPin, MessageCircle,
 } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
+import { WhatsAppLink } from '../../components/ui/WhatsAppChat';
 import ParallaxSection, { ParallaxLayer } from '../../components/ui/ParallaxSection';
 import ImageSlider from '../../components/ui/ImageSlider';
 import HeroSlider from '../../components/ui/HeroSlider';
@@ -286,10 +287,13 @@ export default function Home() {
 
       {/* Contact Strip */}
       <section className="bg-brand-gold py-6 sm:py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 lg:gap-12 text-brand-navy text-center sm:text-left">
-          <a href={`tel:${CONTACT.phone}`} className="flex items-center gap-2 font-semibold text-sm sm:text-base hover:opacity-80 transition-all duration-300">
-            <Phone className="w-5 h-5 shrink-0" /> {CONTACT.phone}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 lg:gap-10 text-brand-navy text-center sm:text-left flex-wrap">
+          <a href={`tel:${CONTACT.phoneTel}`} className="flex items-center gap-2 font-semibold text-sm sm:text-base hover:opacity-80 transition-all duration-300">
+            <Phone className="w-5 h-5 shrink-0" /> {CONTACT.phoneDisplay}
           </a>
+          <WhatsAppLink className="flex items-center gap-2 font-semibold text-sm sm:text-base hover:opacity-80 transition-all duration-300">
+            <MessageCircle className="w-5 h-5 shrink-0" /> Let&apos;s chat on WhatsApp
+          </WhatsAppLink>
           <a href={`mailto:${CONTACT.email}`} className="flex items-center gap-2 font-semibold text-sm sm:text-base hover:opacity-80 transition-all duration-300 break-all sm:break-normal">
             <Mail className="w-5 h-5 shrink-0" /> {CONTACT.email}
           </a>
