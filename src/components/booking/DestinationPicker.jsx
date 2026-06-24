@@ -1,24 +1,24 @@
-import { POPULAR_DESTINATIONS } from '../../utils/bookingData';
+import { POPULAR_COUNTRIES } from '../../utils/bookingData';
 import CountryPicker from './CountryPicker';
 import { chipClass } from './formStyles';
 
 export default function DestinationPicker({ value, onChange, error }) {
-  const isPopular = POPULAR_DESTINATIONS.some((d) => d.label === value);
+  const isPopular = POPULAR_COUNTRIES.some((c) => c.name === value);
 
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap gap-2">
-        {POPULAR_DESTINATIONS.map((dest) => {
-          const selected = value === dest.label;
+        {POPULAR_COUNTRIES.map((country) => {
+          const selected = value === country.name;
           return (
             <button
-              key={dest.label}
+              key={country.code}
               type="button"
-              onClick={() => onChange(dest.label)}
+              onClick={() => onChange(country.name)}
               className={chipClass(selected)}
             >
-              <span className="leading-none">{dest.emoji}</span>
-              {dest.label}
+              <span className="leading-none">{country.flag}</span>
+              {country.name}
             </button>
           );
         })}

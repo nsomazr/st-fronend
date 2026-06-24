@@ -1,6 +1,5 @@
 import { getServiceIcon } from '../../utils/serviceIcons';
 import { SERVICE_IMAGES } from '../../utils/constants';
-import PriceDisplay from '../ui/PriceDisplay';
 
 export default function ServicePicker({ services, value, onChange, error }) {
   return (
@@ -39,11 +38,6 @@ export default function ServicePicker({ services, value, onChange, error }) {
               <p className={`font-semibold text-sm leading-tight ${image ? 'text-white' : 'text-brand-navy'}`}>
                 {service.name}
               </p>
-              {service.price_from > 0 && (
-                <p className={`text-xs mt-0.5 ${image ? 'text-brand-gold' : 'text-brand-purple'}`}>
-                  <PriceDisplay usd={service.price_from} layout="stack" tzsClassName={image ? 'text-brand-gold/90' : ''} />
-                </p>
-              )}
             </div>
             {selected && (
               <span className="absolute top-2 right-2 w-5 h-5 bg-brand-gold rounded-full flex items-center justify-center text-brand-navy text-[10px] font-bold">

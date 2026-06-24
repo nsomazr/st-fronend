@@ -13,10 +13,10 @@ import ServiceFormFields from './ServiceFormFields';
 import { useServices } from '../../hooks/useServices';
 import { useBooking } from '../../hooks/useBooking';
 import { getServiceBookingSchema, serviceSelectSchema } from '../../utils/validators';
-import { BUDGET_RANGES } from '../../utils/formatters';
 import { DEFAULT_COUNTRY, STEP_MESSAGES } from '../../utils/bookingData';
 import {
   getServiceFormConfig,
+  getFormSections,
   buildSpecialRequests,
   getSummaryRows,
 } from '../../utils/serviceForms';
@@ -85,7 +85,13 @@ export default function BookingForm() {
   useEffect(() => {
     const serviceSlug = searchParams.get('service');
     if (serviceSlug && services.length) {
-      const svc = services.find((s) => s.slug === serviceSlug);
+      const resolvedSlug =
+        serviceSlug === 'holiday-planning'
+          ? 'travel-consultancy'
+          : serviceSlug === 'maasai-experience-tour'
+            ? 'safari-and-tours'
+            : serviceSlug;
+      const svc = services.find((s) => s.slug === resolvedSlug);
       if (svc) form.setValue('service_id', svc.id);
     }
   }, [searchParams, services, form]);
@@ -94,6 +100,7 @@ export default function BookingForm() {
   const selectedService = services.find((s) => s.id === Number(values.service_id));
   const serviceSlug = selectedService?.slug || 'travel-consultancy';
   const serviceConfig = useMemo(() => getServiceFormConfig(serviceSlug), [serviceSlug]);
+  const formSections = useMemo(() => getFormSections(serviceConfig), [serviceConfig]);
   const { errors } = form.formState;
 
   const stepMsg =
@@ -101,7 +108,6 @@ export default function BookingForm() {
       ? { title: serviceConfig.stepTitle, subtitle: serviceConfig.stepSubtitle }
       : STEP_MESSAGES[step];
 
-  const budgetLabel = BUDGET_RANGES.find((b) => b.value === values.budget_range)?.label;
   const summaryRows = useMemo(() => getSummaryRows(serviceSlug, values), [serviceSlug, values]);
 
   if (booking) return <ConfirmCard booking={booking} />;
@@ -144,7 +150,7 @@ export default function BookingForm() {
         travel_date: toApiDate(data.travel_date),
         return_date: toApiDate(data.return_date),
         num_travelers: Number(data.num_travelers),
-        budget_range: data.budget_range,
+        budget_range: data.budget_range || 'under_500',
         special_requests: buildSpecialRequests(serviceSlug, merged),
       };
       await createBooking(payload);
@@ -266,7 +272,7 @@ export default function BookingForm() {
                   </Section>
 
                   <Section title={serviceConfig.summaryTitle}>
-                    <ServiceFormFields fields={serviceConfig.fields} form={form} values={values} />
+                    <ServiceFormFields sections={formSections} form={form} values={values} />
                   </Section>
 
                   <div className="flex justify-between pt-2">
@@ -311,12 +317,6 @@ export default function BookingForm() {
                             </p>
                           </div>
                         ))}
-                        {budgetLabel && (
-                          <div>
-                            <p className="text-gray-500 text-xs mb-0.5">Budget</p>
-                            <p className="font-medium text-brand-navy">{budgetLabel}</p>
-                          </div>
-                        )}
                       </div>
                     </div>
                   </div>

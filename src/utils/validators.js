@@ -10,7 +10,7 @@ export const personalInfoSchema = yup.object({
 
 export const tripDetailsSchema = yup.object({
   service_id: yup.number().required('Please select a service').positive('Please select a service'),
-  destination: yup.string().required('Destination is required'),
+  destination: yup.string().required('Country is required'),
   travel_date: yup.string().required('Travel date is required'),
   return_date: yup
     .string()

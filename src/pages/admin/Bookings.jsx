@@ -81,7 +81,7 @@ export default function AdminBookings() {
           <div className="relative lg:col-span-2">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
-              placeholder="Search ref, customer, destination..."
+              placeholder="Search ref, customer, country..."
               value={filters.search}
               onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))}
               className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-gold/50 text-sm"
@@ -131,7 +131,7 @@ export default function AdminBookings() {
               <th className="pb-3 pr-4">Ref</th>
               <th className="pb-3 pr-4">Customer</th>
               <th className="pb-3 pr-4">Service</th>
-              <th className="pb-3 pr-4">Destination</th>
+              <th className="pb-3 pr-4">Country</th>
               <th className="pb-3 pr-4">Travel Date</th>
               <th className="pb-3 pr-4">Travelers</th>
               <th className="pb-3 pr-4">Status</th>
@@ -185,7 +185,7 @@ export default function AdminBookings() {
               <div><span className="text-gray-500">Email</span><p className="font-semibold">{selected.customer_email}</p></div>
               <div><span className="text-gray-500">Phone</span><p className="font-semibold">{selected.customer_phone}</p></div>
               <div><span className="text-gray-500">Service</span><p className="font-semibold">{selected.service_name}</p></div>
-              <div><span className="text-gray-500">Destination</span><p className="font-semibold">{selected.destination}</p></div>
+              <div><span className="text-gray-500">Country</span><p className="font-semibold">{selected.destination}</p></div>
               <div><span className="text-gray-500">Travel Date</span><p className="font-semibold">{formatDate(selected.travel_date)}</p></div>
               <div><span className="text-gray-500">Return Date</span><p className="font-semibold">{formatDate(selected.return_date) || 'N/A'}</p></div>
               <div><span className="text-gray-500">Travelers</span><p className="font-semibold">{selected.num_travelers}</p></div>

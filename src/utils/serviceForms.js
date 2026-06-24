@@ -1,4 +1,5 @@
 import * as yup from 'yup';
+import { BUDGET_RANGES } from './formatters';
 
 const dateField = (label, required = true) =>
   required
@@ -25,162 +26,194 @@ const returnDateTest = yup
     return value > this.parent.travel_date;
   });
 
-/** Extra fields stored in special_requests (not top-level API fields). */
+const SERVICE_SLUG_ALIASES = {
+  'holiday-planning': 'travel-consultancy',
+  'maasai-experience-tour': 'safari-and-tours',
+};
+
+const API_FIELD_NAMES = new Set([
+  'destination',
+  'travel_date',
+  'return_date',
+  'num_travelers',
+  'budget_range',
+]);
+
 export const SERVICE_FORMS = {
   'travel-consultancy': {
-    stepTitle: 'Consultation details',
-    stepSubtitle: 'Help us understand your travel goals',
-    summaryTitle: 'Consultation request',
-    fields: [
+    stepTitle: 'Travel & holiday planning',
+    stepSubtitle: 'Share your trip idea — we\'ll handle the rest',
+    summaryTitle: 'Travel & holiday planning',
+    sections: [
       {
-        name: 'trip_purpose',
-        type: 'options',
-        label: 'What are you planning?',
-        required: true,
-        options: [
-          { value: 'leisure', label: 'Leisure holiday' },
-          { value: 'family', label: 'Family trip' },
-          { value: 'honeymoon', label: 'Honeymoon' },
-          { value: 'business', label: 'Business travel' },
-          { value: 'group', label: 'Group tour' },
-          { value: 'undecided', label: 'Not sure yet' },
+        title: 'Your trip',
+        fields: [
+          {
+            name: 'trip_purpose',
+            type: 'options',
+            label: 'What are you planning?',
+            required: true,
+            options: [
+              { value: 'leisure', label: 'Leisure holiday' },
+              { value: 'family', label: 'Family trip' },
+              { value: 'honeymoon', label: 'Honeymoon' },
+              { value: 'business', label: 'Business travel' },
+              { value: 'group', label: 'Group tour' },
+              { value: 'consultation', label: 'Consultation only' },
+              { value: 'undecided', label: 'Not sure yet' },
+            ],
+          },
+          {
+            name: 'destination',
+            type: 'destination',
+            label: 'Destination country',
+            required: true,
+          },
         ],
       },
       {
-        name: 'destination',
-        type: 'destination',
-        label: 'Where would you like to go?',
-        required: true,
+        title: 'Dates & travelers',
+        fields: [
+          { name: 'travel_date', type: 'date', label: 'Departure date', required: true, minToday: true, group: 'dates' },
+          { name: 'return_date', type: 'date', label: 'Return date', required: false, group: 'dates' },
+          { name: 'num_travelers', type: 'travelers', label: 'Travelers', required: true },
+        ],
       },
       {
-        name: 'travel_date',
-        type: 'date',
-        label: 'Preferred travel date',
-        required: true,
-        minToday: true,
+        title: 'Preferences',
+        showWhen: (v) => v.trip_purpose && v.trip_purpose !== 'consultation',
+        fields: [
+          {
+            name: 'accommodation',
+            type: 'options',
+            label: 'Accommodation',
+            required: false,
+            options: [
+              { value: 'hotel', label: 'Hotel' },
+              { value: 'resort', label: 'Resort' },
+              { value: 'apartment', label: 'Apartment' },
+              { value: 'villa', label: 'Villa' },
+              { value: 'any', label: 'Open to suggestions' },
+            ],
+          },
+          {
+            name: 'trip_style',
+            type: 'options',
+            label: 'Trip style',
+            required: false,
+            options: [
+              { value: 'relaxed', label: 'Relaxed' },
+              { value: 'adventure', label: 'Adventure' },
+              { value: 'family', label: 'Family-friendly' },
+              { value: 'romantic', label: 'Romantic' },
+              { value: 'luxury', label: 'Luxury' },
+            ],
+          },
+        ],
       },
       {
-        name: 'return_date',
-        type: 'date',
-        label: 'Return date (if known)',
-        required: false,
-      },
-      {
-        name: 'num_travelers',
-        type: 'travelers',
-        label: 'Number of travelers',
-        required: true,
-      },
-      {
-        name: 'budget_range',
-        type: 'budget',
-        label: 'Estimated budget',
-        required: true,
-      },
-      {
-        name: 'consultation_notes',
-        type: 'textarea',
-        label: 'Questions or preferences',
-        placeholder: 'Destinations you are considering, travel style, must-haves…',
-        required: false,
-        extra: true,
+        title: 'Budget & notes',
+        fields: [
+          { name: 'budget_range', type: 'budget', label: 'Estimated budget', required: true },
+          {
+            name: 'consultation_notes',
+            type: 'textarea',
+            label: 'Anything else we should know?',
+            placeholder: 'Safari, beach, celebrations, dietary needs…',
+            required: false,
+          },
+        ],
       },
     ],
     schema: yup.object({
       trip_purpose: yup.string().required('Please select a trip purpose'),
-      destination: yup.string().required('Destination is required'),
-      travel_date: dateField('Travel date'),
+      destination: yup.string().required('Country is required'),
+      travel_date: dateField('Departure date'),
       return_date: returnDateTest,
       num_travelers: travelersField,
+      accommodation: yup.string(),
+      trip_style: yup.string(),
       budget_range: budgetField,
       consultation_notes: yup.string(),
     }),
   },
 
   'air-ticketing': {
-    stepTitle: 'Flight details',
-    stepSubtitle: 'Tell us about your route and preferences',
+    stepTitle: 'Flight booking',
+    stepSubtitle: 'Your route, dates, and cabin preference',
     summaryTitle: 'Flight request',
-    fields: [
+    sections: [
       {
-        name: 'departure_city',
-        type: 'text',
-        label: 'Flying from',
-        placeholder: 'e.g. Dar es Salaam',
-        required: true,
-        extra: true,
-      },
-      {
-        name: 'destination',
-        type: 'destination',
-        label: 'Flying to',
-        required: true,
-      },
-      {
-        name: 'trip_type',
-        type: 'options',
-        label: 'Trip type',
-        required: true,
-        options: [
-          { value: 'round_trip', label: 'Round trip' },
-          { value: 'one_way', label: 'One way' },
-          { value: 'multi_city', label: 'Multi-city' },
+        title: 'Route',
+        fields: [
+          { name: 'departure_country', type: 'country', label: 'From (country)', required: true, group: 'route' },
+          { name: 'destination', type: 'destination', label: 'To (country)', required: true, group: 'route' },
+          {
+            name: 'trip_type',
+            type: 'options',
+            label: 'Trip type',
+            required: true,
+            options: [
+              { value: 'round_trip', label: 'Round trip' },
+              { value: 'one_way', label: 'One way' },
+              { value: 'multi_city', label: 'Multi-city' },
+            ],
+          },
         ],
       },
       {
-        name: 'travel_date',
-        type: 'date',
-        label: 'Departure date',
-        required: true,
-        minToday: true,
-      },
-      {
-        name: 'return_date',
-        type: 'date',
-        label: 'Return date',
-        required: false,
-        showWhen: (v) => v.trip_type === 'round_trip',
-      },
-      {
-        name: 'flight_class',
-        type: 'options',
-        label: 'Cabin class',
-        required: true,
-        options: [
-          { value: 'economy', label: 'Economy' },
-          { value: 'premium_economy', label: 'Premium economy' },
-          { value: 'business', label: 'Business' },
-          { value: 'first', label: 'First class' },
+        title: 'Dates',
+        fields: [
+          { name: 'travel_date', type: 'date', label: 'Departure date', required: true, minToday: true, group: 'dates' },
+          {
+            name: 'return_date',
+            type: 'date',
+            label: 'Return date',
+            required: false,
+            group: 'dates',
+            showWhen: (v) => v.trip_type === 'round_trip',
+          },
         ],
       },
       {
-        name: 'num_travelers',
-        type: 'travelers',
-        label: 'Passengers',
-        required: true,
+        title: 'Passengers & cabin',
+        fields: [
+          { name: 'num_travelers', type: 'travelers', label: 'Passengers', required: true },
+          {
+            name: 'flight_class',
+            type: 'options',
+            label: 'Cabin class',
+            required: true,
+            options: [
+              { value: 'economy', label: 'Economy' },
+              { value: 'premium_economy', label: 'Premium economy' },
+              { value: 'business', label: 'Business' },
+              { value: 'first', label: 'First class' },
+            ],
+          },
+        ],
       },
       {
-        name: 'budget_range',
-        type: 'budget',
-        label: 'Budget per person',
-        required: true,
-      },
-      {
-        name: 'flexible_dates',
-        type: 'options',
-        label: 'Date flexibility',
-        required: false,
-        extra: true,
-        options: [
-          { value: 'fixed', label: 'Fixed dates' },
-          { value: 'flexible_1_3', label: '±1–3 days' },
-          { value: 'flexible_week', label: '±1 week' },
+        title: 'Budget',
+        fields: [
+          { name: 'budget_range', type: 'budget', label: 'Budget per person', required: true },
+          {
+            name: 'flexible_dates',
+            type: 'options',
+            label: 'Date flexibility',
+            required: false,
+            options: [
+              { value: 'fixed', label: 'Fixed dates' },
+              { value: 'flexible_1_3', label: '±1–3 days' },
+              { value: 'flexible_week', label: '±1 week' },
+            ],
+          },
         ],
       },
     ],
     schema: yup.object({
-      departure_city: yup.string().required('Departure city is required'),
-      destination: yup.string().required('Destination is required'),
+      departure_country: yup.string().required('Departure country is required'),
+      destination: yup.string().required('Destination country is required'),
       trip_type: yup.string().required('Please select trip type'),
       travel_date: dateField('Departure date'),
       return_date: returnDateTest.when('trip_type', {
@@ -196,206 +229,115 @@ export const SERVICE_FORMS = {
   },
 
   'visa-documentation-assistance': {
-    stepTitle: 'Visa application details',
-    stepSubtitle: 'We will guide you through the documentation',
+    stepTitle: 'Visa assistance',
+    stepSubtitle: 'Tell us about your visa application',
     summaryTitle: 'Visa assistance request',
-    fields: [
+    sections: [
       {
-        name: 'destination',
-        type: 'destination',
-        label: 'Country you are applying for',
-        required: true,
-      },
-      {
-        name: 'visa_type',
-        type: 'options',
-        label: 'Visa type',
-        required: true,
-        options: [
-          { value: 'tourist', label: 'Tourist' },
-          { value: 'business', label: 'Business' },
-          { value: 'student', label: 'Student' },
-          { value: 'transit', label: 'Transit' },
-          { value: 'work', label: 'Work' },
-          { value: 'other', label: 'Other' },
+        title: 'Application',
+        fields: [
+          { name: 'destination', type: 'destination', label: 'Country applying for', required: true },
+          {
+            name: 'visa_type',
+            type: 'options',
+            label: 'Visa type',
+            required: true,
+            options: [
+              { value: 'tourist', label: 'Tourist' },
+              { value: 'business', label: 'Business' },
+              { value: 'student', label: 'Student' },
+              { value: 'transit', label: 'Transit' },
+              { value: 'work', label: 'Work' },
+              { value: 'other', label: 'Other' },
+            ],
+          },
+          { name: 'passport_country', type: 'country', label: 'Passport nationality', required: true },
         ],
       },
       {
-        name: 'passport_country',
-        type: 'country',
-        label: 'Passport nationality',
-        required: true,
-        extra: true,
-      },
-      {
-        name: 'travel_date',
-        type: 'date',
-        label: 'Intended travel date',
-        required: true,
-        minToday: true,
-      },
-      {
-        name: 'urgency',
-        type: 'options',
-        label: 'Processing urgency',
-        required: true,
-        extra: true,
-        options: [
-          { value: 'standard', label: 'Standard' },
-          { value: 'express', label: 'Express / urgent' },
+        title: 'Travel & applicants',
+        fields: [
+          { name: 'travel_date', type: 'date', label: 'Intended travel date', required: true, minToday: true },
+          { name: 'num_travelers', type: 'travelers', label: 'Applicants', required: true },
+          {
+            name: 'urgency',
+            type: 'options',
+            label: 'How urgent?',
+            required: true,
+            options: [
+              { value: 'standard', label: 'Standard' },
+              { value: 'express', label: 'Express / urgent' },
+            ],
+          },
         ],
       },
       {
-        name: 'num_travelers',
-        type: 'travelers',
-        label: 'Applicants',
-        required: true,
-      },
-      {
-        name: 'budget_range',
-        type: 'budget',
-        label: 'Service budget',
-        required: true,
-      },
-      {
-        name: 'visa_notes',
-        type: 'textarea',
-        label: 'Previous visa history or notes',
-        placeholder: 'Prior refusals, dependents, special circumstances…',
-        required: false,
-        extra: true,
+        title: 'Notes',
+        fields: [
+          {
+            name: 'visa_notes',
+            type: 'textarea',
+            label: 'Additional information',
+            placeholder: 'Prior refusals, dependents, Schengen requirements…',
+            required: false,
+          },
+        ],
       },
     ],
     schema: yup.object({
-      destination: yup.string().required('Destination country is required'),
+      destination: yup.string().required('Country is required'),
       visa_type: yup.string().required('Please select visa type'),
       passport_country: yup.string().required('Passport nationality is required'),
       travel_date: dateField('Travel date'),
-      urgency: yup.string().required('Please select urgency'),
       num_travelers: travelersField,
-      budget_range: budgetField,
+      urgency: yup.string().required('Please select urgency'),
       visa_notes: yup.string(),
     }),
   },
 
-  'holiday-planning': {
-    stepTitle: 'Holiday package details',
-    stepSubtitle: 'Design your dream getaway with us',
-    summaryTitle: 'Holiday package request',
-    fields: [
-      {
-        name: 'destination',
-        type: 'destination',
-        label: 'Holiday destination',
-        required: true,
-      },
-      {
-        name: 'travel_date',
-        type: 'date',
-        label: 'Departure date',
-        required: true,
-        minToday: true,
-      },
-      {
-        name: 'return_date',
-        type: 'date',
-        label: 'Return date',
-        required: true,
-      },
-      {
-        name: 'num_travelers',
-        type: 'travelers',
-        label: 'Travelers',
-        required: true,
-      },
-      {
-        name: 'accommodation',
-        type: 'options',
-        label: 'Accommodation preference',
-        required: true,
-        extra: true,
-        options: [
-          { value: 'hotel', label: 'Hotel' },
-          { value: 'resort', label: 'Resort' },
-          { value: 'apartment', label: 'Apartment' },
-          { value: 'villa', label: 'Villa' },
-          { value: 'any', label: 'Open to suggestions' },
-        ],
-      },
-      {
-        name: 'trip_style',
-        type: 'options',
-        label: 'Trip style',
-        required: true,
-        extra: true,
-        options: [
-          { value: 'relaxed', label: 'Relaxed' },
-          { value: 'adventure', label: 'Adventure' },
-          { value: 'family', label: 'Family-friendly' },
-          { value: 'romantic', label: 'Romantic' },
-          { value: 'luxury', label: 'Luxury' },
-        ],
-      },
-      {
-        name: 'budget_range',
-        type: 'budget',
-        label: 'Total package budget',
-        required: true,
-      },
-      {
-        name: 'holiday_notes',
-        type: 'textarea',
-        label: 'Activities & special requests',
-        placeholder: 'Safari, beach days, celebrations, dietary needs…',
-        required: false,
-        extra: true,
-      },
-    ],
-    schema: yup.object({
-      destination: yup.string().required('Destination is required'),
-      travel_date: dateField('Departure date'),
-      return_date: dateField('Return date').concat(returnDateTest),
-      num_travelers: travelersField,
-      accommodation: yup.string().required('Please select accommodation'),
-      trip_style: yup.string().required('Please select trip style'),
-      budget_range: budgetField,
-      holiday_notes: yup.string(),
-    }),
-  },
-
   'hotel-reservations': {
-    stepTitle: 'Hotel booking details',
-    stepSubtitle: 'Tell us where and when you need a room',
+    stepTitle: 'Hotel reservation',
+    stepSubtitle: 'Where and when you need a room',
     summaryTitle: 'Hotel reservation request',
-    fields: [
-      { name: 'destination', type: 'destination', label: 'City or destination', required: true },
-      { name: 'travel_date', type: 'date', label: 'Check-in date', required: true, minToday: true },
-      { name: 'return_date', type: 'date', label: 'Check-out date', required: true },
-      { name: 'num_travelers', type: 'travelers', label: 'Guests', required: true },
+    sections: [
       {
-        name: 'room_type',
-        type: 'options',
-        label: 'Room type',
-        required: true,
-        options: [
-          { value: 'single', label: 'Single' },
-          { value: 'double', label: 'Double' },
-          { value: 'twin', label: 'Twin' },
-          { value: 'suite', label: 'Suite' },
-          { value: 'family', label: 'Family room' },
+        title: 'Stay details',
+        fields: [
+          { name: 'destination', type: 'destination', label: 'Country', required: true },
+          { name: 'travel_date', type: 'date', label: 'Check-in', required: true, minToday: true, group: 'dates' },
+          { name: 'return_date', type: 'date', label: 'Check-out', required: true, group: 'dates' },
+          { name: 'num_travelers', type: 'travelers', label: 'Guests', required: true },
+          {
+            name: 'room_type',
+            type: 'options',
+            label: 'Room type',
+            required: true,
+            options: [
+              { value: 'single', label: 'Single' },
+              { value: 'double', label: 'Double' },
+              { value: 'twin', label: 'Twin' },
+              { value: 'suite', label: 'Suite' },
+              { value: 'family', label: 'Family room' },
+            ],
+          },
         ],
       },
-      { name: 'budget_range', type: 'budget', label: 'Nightly budget', required: true },
       {
-        name: 'hotel_notes',
-        type: 'textarea',
-        label: 'Preferences',
-        placeholder: 'Preferred hotel, breakfast, sea view, etc.',
-        required: false,
+        title: 'Budget & preferences',
+        fields: [
+          { name: 'budget_range', type: 'budget', label: 'Nightly budget', required: true },
+          {
+            name: 'hotel_notes',
+            type: 'textarea',
+            label: 'Hotel preferences',
+            placeholder: 'Preferred area, breakfast, sea view…',
+            required: false,
+          },
+        ],
       },
     ],
     schema: yup.object({
-      destination: yup.string().required('Destination is required'),
+      destination: yup.string().required('Country is required'),
       travel_date: dateField('Check-in date'),
       return_date: dateField('Check-out date').concat(returnDateTest),
       num_travelers: travelersField,
@@ -406,77 +348,134 @@ export const SERVICE_FORMS = {
   },
 
   'corporate-travels': {
-    stepTitle: 'Corporate travel details',
-    stepSubtitle: 'We will arrange business travel for your team',
+    stepTitle: 'Corporate travel',
+    stepSubtitle: 'Business travel for your team',
     summaryTitle: 'Corporate travel request',
-    fields: [
-      { name: 'company_name', type: 'text', label: 'Company / organization', placeholder: 'Your company name', required: true },
-      { name: 'destination', type: 'destination', label: 'Destination', required: true },
-      { name: 'travel_date', type: 'date', label: 'Departure date', required: true, minToday: true },
-      { name: 'return_date', type: 'date', label: 'Return date', required: false },
-      { name: 'num_travelers', type: 'travelers', label: 'Travelers', required: true },
+    sections: [
       {
-        name: 'corporate_need',
-        type: 'options',
-        label: 'What do you need?',
-        required: true,
-        options: [
-          { value: 'flights', label: 'Flights only' },
-          { value: 'hotels', label: 'Hotels only' },
-          { value: 'transfers', label: 'Transfers' },
-          { value: 'full_package', label: 'Full package' },
+        title: 'Company',
+        fields: [
+          {
+            name: 'company_name',
+            type: 'text',
+            label: 'Company / organization',
+            placeholder: 'Your company name',
+            required: true,
+          },
+          {
+            name: 'corporate_need',
+            type: 'options',
+            label: 'What do you need?',
+            required: true,
+            options: [
+              { value: 'flights', label: 'Flights' },
+              { value: 'hotels', label: 'Hotels' },
+              { value: 'transfers', label: 'Transfers' },
+              { value: 'full_package', label: 'Full package' },
+            ],
+          },
         ],
       },
-      { name: 'budget_range', type: 'budget', label: 'Budget', required: true },
       {
-        name: 'corporate_notes',
-        type: 'textarea',
-        label: 'Trip purpose & notes',
-        placeholder: 'Conference name, meeting schedule, special requirements…',
-        required: false,
+        title: 'Trip details',
+        fields: [
+          { name: 'destination', type: 'destination', label: 'Destination country', required: true },
+          { name: 'travel_date', type: 'date', label: 'Departure date', required: true, minToday: true, group: 'dates' },
+          { name: 'return_date', type: 'date', label: 'Return date', required: false, group: 'dates' },
+          { name: 'num_travelers', type: 'travelers', label: 'Travelers', required: true },
+        ],
+      },
+      {
+        title: 'Notes',
+        fields: [
+          {
+            name: 'corporate_notes',
+            type: 'textarea',
+            label: 'Purpose & requirements',
+            placeholder: 'Conference, meetings, VIP handling…',
+            required: false,
+          },
+        ],
       },
     ],
     schema: yup.object({
       company_name: yup.string().required('Company name is required'),
-      destination: yup.string().required('Destination is required'),
+      corporate_need: yup.string().required('Please select what you need'),
+      destination: yup.string().required('Country is required'),
       travel_date: dateField('Departure date'),
       return_date: returnDateTest,
       num_travelers: travelersField,
-      corporate_need: yup.string().required('Please select what you need'),
-      budget_range: budgetField,
       corporate_notes: yup.string(),
     }),
   },
 
   'airport-pickups-drop-off': {
-    stepTitle: 'Transfer details',
-    stepSubtitle: 'Book your airport pickup or drop-off',
+    stepTitle: 'Airport transfer',
+    stepSubtitle: 'Pickup or drop-off details',
     summaryTitle: 'Airport transfer request',
-    fields: [
-      { name: 'pickup_location', type: 'text', label: 'Pickup location', placeholder: 'e.g. Julius Nyerere Airport', required: true },
-      { name: 'destination', type: 'text', label: 'Drop-off location', placeholder: 'e.g. Hotel name or address', required: true },
-      { name: 'travel_date', type: 'date', label: 'Transfer date', required: true, minToday: true },
-      { name: 'pickup_time', type: 'text', label: 'Pickup time', placeholder: 'e.g. 14:30 or flight arrival time', required: true },
-      { name: 'num_travelers', type: 'travelers', label: 'Passengers', required: true },
+    sections: [
       {
-        name: 'vehicle_type',
-        type: 'options',
-        label: 'Vehicle type',
-        required: true,
-        options: [
-          { value: 'sedan', label: 'Sedan' },
-          { value: 'suv', label: 'SUV' },
-          { value: 'van', label: 'Van' },
-          { value: 'luxury', label: 'Luxury' },
+        title: 'Route',
+        fields: [
+          {
+            name: 'pickup_location',
+            type: 'text',
+            label: 'Pickup from',
+            placeholder: 'e.g. Julius Nyerere Airport',
+            required: true,
+          },
+          {
+            name: 'destination',
+            type: 'text',
+            label: 'Drop-off at',
+            placeholder: 'e.g. Hotel name or address',
+            required: true,
+          },
         ],
       },
-      { name: 'budget_range', type: 'budget', label: 'Budget', required: true },
       {
-        name: 'transfer_notes',
-        type: 'textarea',
-        label: 'Flight number & notes',
-        placeholder: 'Flight number, luggage, child seat…',
-        required: false,
+        title: 'When',
+        fields: [
+          { name: 'travel_date', type: 'date', label: 'Date', required: true, minToday: true, group: 'when' },
+          {
+            name: 'pickup_time',
+            type: 'text',
+            label: 'Time / flight arrival',
+            placeholder: 'e.g. 14:30 or KQ483',
+            required: true,
+            group: 'when',
+          },
+        ],
+      },
+      {
+        title: 'Vehicle',
+        fields: [
+          { name: 'num_travelers', type: 'travelers', label: 'Passengers', required: true },
+          {
+            name: 'vehicle_type',
+            type: 'options',
+            label: 'Vehicle type',
+            required: true,
+            options: [
+              { value: 'sedan', label: 'Sedan' },
+              { value: 'suv', label: 'SUV' },
+              { value: 'van', label: 'Van' },
+              { value: 'luxury', label: 'Luxury' },
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Notes',
+        fields: [
+          {
+            name: 'transfer_notes',
+            type: 'textarea',
+            label: 'Special requests',
+            placeholder: 'Luggage, child seat, meet-and-greet…',
+            required: false,
+          },
+        ],
       },
     ],
     schema: yup.object({
@@ -486,135 +485,136 @@ export const SERVICE_FORMS = {
       pickup_time: yup.string().required('Pickup time is required'),
       num_travelers: travelersField,
       vehicle_type: yup.string().required('Please select vehicle type'),
-      budget_range: budgetField,
       transfer_notes: yup.string(),
     }),
   },
 
   'safari-and-tours': {
-    stepTitle: 'Safari & tour details',
-    stepSubtitle: 'Plan your wildlife adventure with us',
+    stepTitle: 'Safari & tours',
+    stepSubtitle: 'Wildlife safaris and Maasai cultural experiences',
     summaryTitle: 'Safari & tour request',
-    fields: [
-      { name: 'destination', type: 'destination', label: 'Park or destination', required: true },
-      { name: 'travel_date', type: 'date', label: 'Start date', required: true, minToday: true },
-      { name: 'return_date', type: 'date', label: 'End date', required: true },
-      { name: 'num_travelers', type: 'travelers', label: 'Travelers', required: true },
+    sections: [
       {
-        name: 'safari_type',
-        type: 'options',
-        label: 'Safari type',
-        required: true,
-        options: [
-          { value: 'game_drive', label: 'Game drive' },
-          { value: 'walking', label: 'Walking safari' },
-          { value: 'balloon', label: 'Balloon safari' },
-          { value: 'combo', label: 'Multi-park combo' },
+        title: 'Tour',
+        fields: [
+          {
+            name: 'tour_type',
+            type: 'options',
+            label: 'Experience type',
+            required: true,
+            options: [
+              { value: 'game_drive', label: 'Game drive safari' },
+              { value: 'walking', label: 'Walking safari' },
+              { value: 'balloon', label: 'Balloon safari' },
+              { value: 'combo', label: 'Multi-park combo' },
+              { value: 'maasai_village', label: 'Maasai village visit' },
+              { value: 'cultural_day', label: 'Cultural day tour' },
+              { value: 'maasai_overnight', label: 'Maasai overnight' },
+              { value: 'ceremony', label: 'Ceremony & dance' },
+            ],
+          },
+          { name: 'destination', type: 'destination', label: 'Country', required: true },
         ],
       },
-      { name: 'budget_range', type: 'budget', label: 'Package budget', required: true },
       {
-        name: 'safari_notes',
-        type: 'textarea',
-        label: 'Special requests',
-        placeholder: 'Lodges, photography, mobility needs…',
-        required: false,
+        title: 'Dates & group',
+        fields: [
+          { name: 'travel_date', type: 'date', label: 'Start date', required: true, minToday: true, group: 'dates' },
+          { name: 'return_date', type: 'date', label: 'End date (if multi-day)', required: false, group: 'dates' },
+          { name: 'num_travelers', type: 'travelers', label: 'Travelers', required: true },
+        ],
+      },
+      {
+        title: 'Budget & notes',
+        fields: [
+          { name: 'budget_range', type: 'budget', label: 'Package budget', required: true },
+          {
+            name: 'tour_notes',
+            type: 'textarea',
+            label: 'Special requests',
+            placeholder: 'Lodges, photography, accessibility…',
+            required: false,
+          },
+        ],
       },
     ],
     schema: yup.object({
-      destination: yup.string().required('Destination is required'),
+      tour_type: yup.string().required('Please select experience type'),
+      destination: yup.string().required('Country is required'),
       travel_date: dateField('Start date'),
-      return_date: dateField('End date').concat(returnDateTest),
+      return_date: returnDateTest,
       num_travelers: travelersField,
-      safari_type: yup.string().required('Please select safari type'),
       budget_range: budgetField,
-      safari_notes: yup.string(),
-    }),
-  },
-
-  'maasai-experience-tour': {
-    stepTitle: 'Maasai experience details',
-    stepSubtitle: 'Share your cultural tour preferences',
-    summaryTitle: 'Maasai experience request',
-    fields: [
-      { name: 'destination', type: 'text', label: 'Tour location', placeholder: 'e.g. Arusha region', required: true },
-      { name: 'travel_date', type: 'date', label: 'Tour date', required: true, minToday: true },
-      { name: 'num_travelers', type: 'travelers', label: 'Participants', required: true },
-      {
-        name: 'experience_type',
-        type: 'options',
-        label: 'Experience type',
-        required: true,
-        options: [
-          { value: 'village_visit', label: 'Village visit' },
-          { value: 'cultural_day', label: 'Full cultural day' },
-          { value: 'overnight', label: 'Overnight stay' },
-          { value: 'ceremony', label: 'Ceremony & dance' },
-        ],
-      },
-      { name: 'budget_range', type: 'budget', label: 'Budget', required: true },
-      {
-        name: 'maasai_notes',
-        type: 'textarea',
-        label: 'Notes',
-        placeholder: 'Group size, language, accessibility…',
-        required: false,
-      },
-    ],
-    schema: yup.object({
-      destination: yup.string().required('Tour location is required'),
-      travel_date: dateField('Tour date'),
-      num_travelers: travelersField,
-      experience_type: yup.string().required('Please select experience type'),
-      budget_range: budgetField,
-      maasai_notes: yup.string(),
+      tour_notes: yup.string(),
     }),
   },
 
   'travel-insurance': {
-    stepTitle: 'Travel insurance details',
-    stepSubtitle: 'Get the right cover for your trip',
+    stepTitle: 'Travel insurance',
+    stepSubtitle: 'Cover for your upcoming trip',
     summaryTitle: 'Travel insurance request',
-    fields: [
-      { name: 'destination', type: 'destination', label: 'Destination', required: true },
-      { name: 'travel_date', type: 'date', label: 'Trip start date', required: true, minToday: true },
-      { name: 'return_date', type: 'date', label: 'Trip end date', required: true },
-      { name: 'num_travelers', type: 'travelers', label: 'Travelers to cover', required: true },
+    sections: [
       {
-        name: 'coverage_type',
-        type: 'options',
-        label: 'Coverage type',
-        required: true,
-        options: [
-          { value: 'basic', label: 'Basic' },
-          { value: 'standard', label: 'Standard' },
-          { value: 'comprehensive', label: 'Comprehensive' },
-          { value: 'medical_only', label: 'Medical only' },
+        title: 'Trip details',
+        fields: [
+          { name: 'destination', type: 'destination', label: 'Destination country', required: true },
+          { name: 'travel_date', type: 'date', label: 'Trip start', required: true, minToday: true, group: 'dates' },
+          { name: 'return_date', type: 'date', label: 'Trip end', required: true, group: 'dates' },
+          { name: 'num_travelers', type: 'travelers', label: 'Travelers to cover', required: true },
         ],
       },
-      { name: 'budget_range', type: 'budget', label: 'Budget', required: true },
       {
-        name: 'insurance_notes',
-        type: 'textarea',
-        label: 'Additional details',
-        placeholder: 'Pre-existing conditions, Schengen visa, age of travelers…',
-        required: false,
+        title: 'Coverage',
+        fields: [
+          {
+            name: 'coverage_type',
+            type: 'options',
+            label: 'Coverage level',
+            required: true,
+            options: [
+              { value: 'basic', label: 'Basic' },
+              { value: 'standard', label: 'Standard' },
+              { value: 'comprehensive', label: 'Comprehensive' },
+              { value: 'medical_only', label: 'Medical only' },
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Notes',
+        fields: [
+          {
+            name: 'insurance_notes',
+            type: 'textarea',
+            label: 'Additional information',
+            placeholder: 'Pre-existing conditions, Schengen visa, ages…',
+            required: false,
+          },
+        ],
       },
     ],
     schema: yup.object({
-      destination: yup.string().required('Destination is required'),
+      destination: yup.string().required('Country is required'),
       travel_date: dateField('Trip start date'),
       return_date: dateField('Trip end date').concat(returnDateTest),
       num_travelers: travelersField,
-      coverage_type: yup.string().required('Please select coverage type'),
-      budget_range: budgetField,
+      coverage_type: yup.string().required('Please select coverage level'),
       insurance_notes: yup.string(),
     }),
   },
 };
 
 export function getServiceFormConfig(slug) {
-  return SERVICE_FORMS[slug] || SERVICE_FORMS['travel-consultancy'];
+  const resolved = SERVICE_SLUG_ALIASES[slug] || slug;
+  return SERVICE_FORMS[resolved] || SERVICE_FORMS['travel-consultancy'];
+}
+
+export function getFormSections(config) {
+  return config.sections ?? [{ title: null, fields: config.fields ?? [] }];
+}
+
+export function flattenFields(config) {
+  return getFormSections(config).flatMap((section) => section.fields);
 }
 
 export function getOptionLabel(field, value) {
@@ -622,19 +622,11 @@ export function getOptionLabel(field, value) {
   return field.options.find((o) => o.value === value)?.label || value;
 }
 
-const API_FIELD_NAMES = new Set([
-  'destination',
-  'travel_date',
-  'return_date',
-  'num_travelers',
-  'budget_range',
-]);
-
 export function buildSpecialRequests(slug, data) {
   const config = getServiceFormConfig(slug);
   const lines = [];
 
-  for (const field of config.fields) {
+  for (const field of flattenFields(config)) {
     if (API_FIELD_NAMES.has(field.name)) continue;
     const value = data[field.name];
     if (!value) continue;
@@ -649,11 +641,16 @@ export function getSummaryRows(slug, data) {
   const config = getServiceFormConfig(slug);
   const rows = [];
 
-  for (const field of config.fields) {
+  for (const field of flattenFields(config)) {
     const value = data[field.name];
     if (!value) continue;
     if (field.type === 'date') {
       rows.push({ label: field.label, value });
+      continue;
+    }
+    if (field.type === 'budget') {
+      const label = BUDGET_RANGES.find((b) => b.value === value)?.label;
+      rows.push({ label: field.label, value: label || String(value) });
       continue;
     }
     if (field.options) {

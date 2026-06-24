@@ -39,7 +39,7 @@ export default function ConfirmCard({ booking }) {
                 <p className="font-medium text-brand-navy">{booking.service_name || booking.service?.name}</p>
               </div>
               <div>
-                <p className="text-gray-500 text-xs">Destination</p>
+                <p className="text-gray-500 text-xs">Country</p>
                 <p className="font-medium text-brand-navy">{booking.destination}</p>
               </div>
               <div>

@@ -7,7 +7,6 @@ import Button from '../../components/ui/Button';
 import { useServices } from '../../hooks/useServices';
 import { ServiceCardSkeleton } from '../../components/ui/Skeleton';
 import { SERVICE_IMAGES, FALLBACK_SERVICES, SERVICE_DETAILS } from '../../utils/constants';
-import PriceDisplay from '../../components/ui/PriceDisplay';
 
 export default function Services() {
   const { services, loading, error, refetch } = useServices();
@@ -65,10 +64,10 @@ export default function Services() {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.05 }}
               >
-                <Card className="overflow-hidden p-0">
-                  <div className="flex flex-col md:flex-row">
+                <Card className="p-4 sm:p-5">
+                  <div className="flex flex-col md:flex-row gap-4 md:gap-5">
                     {image && (
-                      <div className="md:w-2/5 lg:w-2/5 shrink-0">
+                      <div className="md:w-2/5 lg:w-2/5 shrink-0 overflow-hidden rounded-2xl">
                         <img
                           src={image}
                           alt={service.name}
@@ -78,15 +77,7 @@ export default function Services() {
                       </div>
                     )}
                     <div className="flex-1 p-5 sm:p-6">
-                      <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
-                        <h3 className="text-xl font-bold text-brand-navy">{service.name}</h3>
-                        {service.price_from > 0 && (
-                          <PriceDisplay
-                            usd={service.price_from}
-                            className="text-brand-purple font-semibold text-sm text-right"
-                          />
-                        )}
-                      </div>
+                      <h3 className="text-xl font-bold text-brand-navy mb-2">{service.name}</h3>
 
                       <p className={`text-gray-600 text-sm leading-relaxed ${isOpen ? '' : 'line-clamp-2'}`}>
                         {service.description}

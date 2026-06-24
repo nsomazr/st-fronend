@@ -61,12 +61,12 @@ export const SERVICE_IMAGES = {
 export const FALLBACK_SERVICES = [
   {
     id: 1,
-    name: 'Travel Consultancy',
+    name: 'Travel Consultancy & Holiday Planning',
     slug: 'travel-consultancy',
     description:
-      'Expert travel advice tailored to your needs. We help you plan the perfect itinerary, choose destinations, and make informed travel decisions.',
+      'Expert travel advice and end-to-end holiday planning — personalized itineraries, packages, accommodation, activities, and transfers tailored to your trip.',
     icon: 'compass',
-    image: SERVICE_IMAGES['travel-consultancy'],
+    image: SERVICE_IMAGES['holiday-planning'],
     price_from: 50,
     is_active: true,
   },
@@ -94,17 +94,6 @@ export const FALLBACK_SERVICES = [
   },
   {
     id: 4,
-    name: 'Holiday Planning',
-    slug: 'holiday-planning',
-    description:
-      'End-to-end holiday packages including accommodation, activities, and transfers. Let us craft your dream vacation from start to finish.',
-    icon: 'palmtree',
-    image: SERVICE_IMAGES['holiday-planning'],
-    price_from: 200,
-    is_active: true,
-  },
-  {
-    id: 5,
     name: 'Hotel Reservations',
     slug: 'hotel-reservations',
     description:
@@ -115,7 +104,7 @@ export const FALLBACK_SERVICES = [
     is_active: true,
   },
   {
-    id: 6,
+    id: 5,
     name: 'Corporate Travels',
     slug: 'corporate-travels',
     description:
@@ -126,7 +115,7 @@ export const FALLBACK_SERVICES = [
     is_active: true,
   },
   {
-    id: 7,
+    id: 6,
     name: 'Airport Pickups & Drop Off',
     slug: 'airport-pickups-drop-off',
     description:
@@ -137,29 +126,18 @@ export const FALLBACK_SERVICES = [
     is_active: true,
   },
   {
-    id: 8,
-    name: 'Safari & Tours',
+    id: 7,
+    name: 'Safari, Tours & Maasai Experiences',
     slug: 'safari-and-tours',
     description:
-      'Unforgettable wildlife safaris and guided tours across Tanzania and East Africa — Serengeti, Ngorongoro, and beyond.',
+      'Wildlife safaris, guided tours, and authentic Maasai cultural experiences across Tanzania and East Africa — from Serengeti game drives to village visits.',
     icon: 'binoculars',
     image: SERVICE_IMAGES['safari-and-tours'],
     price_from: 250,
     is_active: true,
   },
   {
-    id: 9,
-    name: 'Maasai Experience Tour',
-    slug: 'maasai-experience-tour',
-    description:
-      'Authentic Maasai cultural experiences — village visits, traditional ceremonies, and immersive day tours with local guides.',
-    icon: 'users',
-    image: SERVICE_IMAGES['maasai-experience-tour'],
-    price_from: 120,
-    is_active: true,
-  },
-  {
-    id: 10,
+    id: 8,
     name: 'Travel Insurance',
     slug: 'travel-insurance',
     description:
@@ -175,12 +153,13 @@ export const SERVICE_DETAILS = {
   'travel-consultancy': {
     highlights: [
       'One-on-one consultation with a travel expert',
-      'Personalized itinerary planning',
-      'Destination research and recommendations',
+      'Personalized itinerary and holiday package planning',
+      'Destination research and country recommendations',
+      'Hotel, resort, and accommodation arrangements',
+      'Activities, excursions, and airport transfers',
       'Budget planning and cost breakdown',
-      'Travel tips for first-time and repeat travelers',
     ],
-    idealFor: 'Individuals, families, and groups planning domestic or international trips',
+    idealFor: 'Individuals, couples, families, and groups planning holidays or seeking travel advice',
   },
   'air-ticketing': {
     highlights: [
@@ -201,16 +180,6 @@ export const SERVICE_DETAILS = {
       'Follow-up and status tracking support',
     ],
     idealFor: 'Tourist, business, student, and transit visa applicants',
-  },
-  'holiday-planning': {
-    highlights: [
-      'Custom holiday packages and itineraries',
-      'Hotel and resort bookings',
-      'Airport transfers and local transport',
-      'Activity and excursion arrangements',
-      'Honeymoon, family, and adventure packages',
-    ],
-    idealFor: 'Couples, families, and groups seeking a fully planned getaway',
   },
   'hotel-reservations': {
     highlights: [
@@ -244,23 +213,13 @@ export const SERVICE_DETAILS = {
   },
   'safari-and-tours': {
     highlights: [
-      'Serengeti, Ngorongoro, and Tarangire safaris',
-      'Private and group game drives',
-      'Professional safari guides',
-      'Luxury lodges and tented camps',
-      'Custom multi-day tour packages',
+      'Serengeti, Ngorongoro, and Tarangire wildlife safaris',
+      'Game drives, walking safaris, and balloon safaris',
+      'Authentic Maasai village visits and cultural ceremonies',
+      'Professional guides and luxury lodge options',
+      'Custom multi-day safari and tour packages',
     ],
-    idealFor: 'Wildlife lovers, families, and adventure seekers',
-  },
-  'maasai-experience-tour': {
-    highlights: [
-      'Authentic Maasai village visits',
-      'Traditional dance and cultural ceremonies',
-      'Guided walks with Maasai warriors',
-      'Handicraft and local market experiences',
-      'Half-day and full-day tour options',
-    ],
-    idealFor: 'Culture enthusiasts and curious travelers',
+    idealFor: 'Wildlife lovers, culture enthusiasts, families, and adventure seekers',
   },
   'travel-insurance': {
     highlights: [
