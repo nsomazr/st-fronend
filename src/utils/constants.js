@@ -1,11 +1,11 @@
 export const CONTACT = {
-  phone: '0794333544',
-  phoneDisplay: '0794 333 544',
-  phoneTel: '+255794333544',
-  whatsapp: '0794333544',
-  whatsappUrl: 'https://wa.me/255794333544?text=Hello%20Smart%20Travels%20by%20HL',
-  email: 'info@akisgroup.net',
-  address: 'Sukaei House, Posta, Dar es Salaam, Tanzania',
+  phone: '0794333455',
+  phoneDisplay: '0794 333 455',
+  phoneTel: '+255794333455',
+  whatsapp: '0794333455',
+  whatsappUrl: 'https://wa.me/255794333455?text=Hello%20Smart%20Travels%20by%20HL',
+  email: 'bookings@smartravels.co.tz',
+  address: 'Sukari House, Posta, Dar es Salaam, Tanzania',
   city: 'Dar es Salaam, Tanzania',
 };
 

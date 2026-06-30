@@ -30,7 +30,7 @@ echo "Installing dependencies..."
 npm install
 
 echo "Building production bundle..."
-BUILD_API_URL="${VITE_API_URL_PRODUCTION:-https://api.smarttravel.co.tz/api}"
+BUILD_API_URL="${VITE_API_URL_PRODUCTION:-https://api.smarttravels.co.tz/api}"
 echo "   VITE_API_URL=${BUILD_API_URL}"
 VITE_API_URL="$BUILD_API_URL" npm run build
 

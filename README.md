@@ -30,7 +30,7 @@ App available at `http://localhost:3094`
 |----------|-------------|---------|
 | `VITE_API_URL` | Backend API base URL | `http://localhost:8094/api` |
 
-For production, set `VITE_API_URL_PRODUCTION=https://api.smarttravel.co.tz/api` in `.env` before deploying.
+For production, set `VITE_API_URL_PRODUCTION=https://api.smarttravels.co.tz/api` in `.env` before deploying.
 
 ## PM2 Production Deploy
 
@@ -38,7 +38,7 @@ Prerequisites: `npm install -g pm2`, `.env` with production `VITE_API_URL`.
 
 ```bash
 cp .env.example .env
-# Edit .env: VITE_API_URL_PRODUCTION=https://api.smarttravel.co.tz/api
+# Edit .env: VITE_API_URL_PRODUCTION=https://api.smarttravels.co.tz/api
 
 chmod +x deploy.sh start.sh
 ./deploy.sh
